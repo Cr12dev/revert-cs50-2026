@@ -29,3 +29,10 @@ You can generate image `.bmp` using `/utils/create_test_image.py`
 ```bash
 python3 ./utils/create_test_image.py
 ```
+
+
+## Roadmap
+ - [x] Format for `.bmp`
+ - [ ] Formatl for `.png` `.jpg`
+ - [ ] Tools for edit the pictures
+
