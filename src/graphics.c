@@ -1,9 +1,18 @@
 #include "graphics.h"
 #include <stdio.h>
 
+
+
 bool graphics_init(SDL_Window** window, SDL_Renderer** renderer, int width, int height){
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("Error al iniciar el SDL: %s\n", SDL_GetError());
+        return false;
+    }
+
+    int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
+    if (!(IMG_Init(imgFlags) & imgFlags)) {
+        printf("Error al iniciar SDL_image: %s\n", IMG_GetError());
+        SDL_Quit();
         return false;
     }
 
@@ -44,13 +53,14 @@ void graphics_cleanup(SDL_Window* window, SDL_Renderer* renderer){
     if (window) {
         SDL_DestroyWindow(window);
     }
-
+    IMG_Quit();
+    SDL_Quit();
 }
 
 Image* image_load(SDL_Renderer* renderer, const char* filename) {
-    SDL_Surface* surface = SDL_LoadBMP(filename);
+    SDL_Surface* surface = IMG_Load(filename);
     if (!surface) {
-        printf("Error cargando BMP '%s': %s\n", filename, SDL_GetError());
+        printf("Error cargando imagen '%s': %s\n", filename, IMG_GetError());
         return NULL;
     }
 

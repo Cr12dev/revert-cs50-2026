@@ -15,7 +15,7 @@ int main(int agrc, char* argv[]) {
         return 1;
     }
 
-    test_image = image_load(renderer, "foto.bmp");
+    test_image = image_load(renderer, "./assets/images/1.png");
     if (!test_image) {
         printf("No se pudo cargar la imagen. Saliendo... \n");
         graphics_cleanup(window, renderer);
@@ -29,8 +29,7 @@ int main(int agrc, char* argv[]) {
     SDL_Event event;
 
     while (running){
-        //Bucle principal de la aplicacion
-        //Procesar eventos
+
 
         while (SDL_PollEvent(&event))
         {
@@ -57,7 +56,7 @@ int main(int agrc, char* argv[]) {
         
     }
 
-    //Clean
+
 
     image_free(test_image);
     graphics_cleanup(window, renderer);
