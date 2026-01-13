@@ -4,7 +4,9 @@
 
 It is lightweight software that allows you to view **.bmp** files. It is designed for Harvard's CS50.
 
-[Screenshot]("./screenshots/1.png")
+<img src="https://github.com/Cr12dev/revert-cs50-2026/blob/main/screenshots/1.png"/>
+
+[ScreenShot]("https://github.com/Cr12dev/revert-cs50-2026/blob/main/screenshots/1.png")
 
 ## Install 
 ```bash
