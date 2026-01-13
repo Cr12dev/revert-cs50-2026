@@ -1,74 +1,68 @@
+#include "./graphics.h"
 #include <stdio.h>
-#include <SDL2/SDL.h>
 #include <stdbool.h>
 
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+#define FRAME_DELAY 16 
+
 int main(int agrc, char* argv[]) {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        printf("Error al iniciar el SDL: %s\n", SDL_GetError());
+    SDL_Window* window = NULL;
+    SDL_Renderer* renderer = NULL;
+    Image* test_image = NULL;
+
+    if (!graphics_init(&window, &renderer, WINDOW_WIDTH, WINDOW_HEIGHT)) {
         return 1;
     }
 
-    SDL_Window* ventana = SDL_CreateWindow(
-        "REVERT V.1.0.0",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        640,
-        480,
-        SDL_WINDOW_SHOWN
-    );
-
-    if (!ventana) {
-        printf("Error al crear la ventana: %s\n", SDL_GetError());
-        SDL_Quit();
+    test_image = image_load(renderer, "foto.bmp");
+    if (!test_image) {
+        printf("No se pudo cargar la imagen. Saliendo... \n");
+        graphics_cleanup(window, renderer);
         return 1;
     }
 
-    SDL_Renderer* renderizador = SDL_CreateRenderer(
-        ventana,
-        -1,
-        SDL_RENDERER_ACCELERATED
-    );
+    printf("Imagen cargada: %dx%d pixeles \n", test_image->width, test_image->height);
 
-    if (!renderizador) {
-        printf("Error añ crear el renderizador: %s\n", SDL_GetError());
-        SDL_DestroyWindow(ventana);
-        SDL_Quit();
-        return 1;
-    }
 
-    bool ejecutando = true;
-    SDL_Event evento;
+    bool running = true;
+    SDL_Event event;
 
-    while (ejecutando){
+    while (running){
         //Bucle principal de la aplicacion
         //Procesar eventos
 
-        while (SDL_PollEvent(&evento))
+        while (SDL_PollEvent(&event))
         {
-            if (evento.type == SDL_QUIT) {
-                ejecutando = false;
+            switch (event.type) {
+                case SDL_QUIT:
+                    running = false;
+                    break;
+
+                case SDL_KEYDOWN:
+                    if (event.key.keysym.sym == SDLK_ESCAPE) {
+                        running = false;
+                    }
+                    break;
             }
         }
 
-        //Limpiar la pantalla de color azul
-        SDL_SetRenderDrawColor(renderizador, 0, 0, 128, 255);
-        SDL_RenderClear(renderizador);
+        render_clear(renderer, 45, 45, 90);
 
-        //Dibujar un objeto
-        SDL_Rect rectangulo = {200, 150, 240, 180};
-        SDL_SetRenderDrawColor(renderizador, 255, 0, 0, 255);
-        SDL_RenderFillRect(renderizador, &rectangulo);
+        image_render_centered(renderer, test_image);
 
-        SDL_RenderPresent(renderizador);
+        render_present(renderer);
 
-        SDL_Delay(16);
+        SDL_Delay(FRAME_DELAY);
         
     }
 
     //Clean
 
-    SDL_DestroyRenderer(renderizador);
-    SDL_DestroyWindow(ventana);
+    image_free(test_image);
+    graphics_cleanup(window, renderer);
+
+    printf("Programa terminado correcgtamente\n");
 
     return 0;
 }
