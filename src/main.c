@@ -1,9 +1,8 @@
 #include "./graphics.h"
 #include <stdio.h>
 #include <stdbool.h>
+#include "config.h"
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
 #define FRAME_DELAY 16 
 
 int main(int argc, char* argv[]) {

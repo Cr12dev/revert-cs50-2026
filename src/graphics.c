@@ -115,15 +115,27 @@ void image_render_centered(SDL_Renderer* renderer, Image* image) {
     int window_width, window_height;
     SDL_GetRendererOutputSize(renderer, &window_width, &window_height);
 
+    int max_w = window_width - (IMAGE_PADDING * 2);
+    int max_h = window_height - (IMAGE_PADDING * 2);
+
+    float scale = 1.0f;
+    if (image->width > max_w || image->height > max_h) {
+        float scale_w = (float)max_w / image->width;
+        float scale_h = (float)max_h / image->height;
+        scale = (scale_w < scale_h) ? scale_w : scale_h;
+    }
+
+    int final_w = (int)(image->width * scale);
+    int final_h = (int)(image->height * scale);
+
     SDL_Rect dest_rect = {
-        .x = (window_width - image->width) / 2,
-        .y = (window_height - image->height) / 2,
-        .w = image->width,
-        .h = image->height
+        .x = (window_width - final_w) / 2,
+        .y = (window_height - final_h) / 2,
+        .w = final_w,
+        .h = final_h
     };
 
     SDL_RenderCopy(renderer, image->texture, NULL, &dest_rect);
-
 }
 
 void render_clear(SDL_Renderer* renderer, Uint8 r, Uint8 g, Uint8 b) {
