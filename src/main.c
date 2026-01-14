@@ -35,16 +35,18 @@ int main(int argc, char* argv[]) {
     }
 
     // Botones principales
-    Button btn_save = {{10, 10, 100, 30}, "Guardar", {100, 100, 255}, false};
-    Button btn_draw = {{120, 10, 120, 30}, "Dibujar: OFF", {255, 100, 100}, false};
-    Button btn_scale = {{250, 10, 100, 30}, "Escala: 1x", {100, 255, 100}, false};
+    Button btn_save = {{10, 10, 100, 30}, "Guardar", {100, 100, 255}, false, -1};
+    Button btn_draw = {{120, 10, 120, 30}, "Dibujar: OFF", {255, 100, 100}, false, -1};
+    Button btn_scale = {{250, 10, 100, 30}, "Escala: 1x", {100, 255, 100}, false, -1};
+    Button btn_edit = {{360, 10, 100, 30}, "Edit", {200, 100, 255}, false, 0}; // 0 padding como se pidió
 
-    // Botones de filtros
-    Button btn_gray = {{360, 10, 100, 30}, "Gris", {150, 150, 150}, false};
-    Button btn_sepia = {{470, 10, 100, 30}, "Sepia", {160, 120, 90}, false};
-    Button btn_invert = {{580, 10, 100, 30}, "Invertir", {200, 200, 200}, false};
+    // Botones de filtros (Toolbox)
+    Button btn_gray = {{470, 10, 80, 30}, "Gris", {150, 150, 150}, false, -1};
+    Button btn_sepia = {{560, 10, 80, 30}, "Sepia", {160, 120, 90}, false, -1};
+    Button btn_invert = {{650, 10, 80, 30}, "Inv", {200, 200, 200}, false, -1};
 
     bool drawing_mode = false;
+    bool show_toolbox = false;
     float current_scale = 1.0f;
     bool running = true;
     SDL_Event event;
@@ -70,18 +72,26 @@ int main(int argc, char* argv[]) {
                 btn_scale.label = scale_label;
             }
 
-            // Lógica de filtros
-            if (button_is_clicked(&btn_gray, &event) && event.type == SDL_MOUSEBUTTONDOWN) {
-                image_apply_grayscale(test_image);
-                image_update_texture(renderer, test_image);
+            if (button_is_clicked(&btn_edit, &event) && event.type == SDL_MOUSEBUTTONDOWN) {
+                show_toolbox = !show_toolbox;
+                btn_edit.label = show_toolbox ? "Close" : "Edit";
             }
-            if (button_is_clicked(&btn_sepia, &event) && event.type == SDL_MOUSEBUTTONDOWN) {
-                image_apply_sepia(test_image);
-                image_update_texture(renderer, test_image);
-            }
-            if (button_is_clicked(&btn_invert, &event) && event.type == SDL_MOUSEBUTTONDOWN) {
-                image_apply_invert(test_image);
-                image_update_texture(renderer, test_image);
+
+            // Lógica de filtros (solo si toolbox está abierto)
+            if (show_toolbox) {
+                if (button_is_clicked(&btn_gray, &event) && event.type == SDL_MOUSEBUTTONDOWN) {
+                    image_apply_grayscale(test_image);
+                    image_update_texture(renderer, test_image);
+                }
+                if (button_is_clicked(&btn_sepia, &event) && event.type == SDL_MOUSEBUTTONDOWN) {
+                    image_apply_sepia(test_image);
+                    image_update_texture(renderer, test_image);
+                }
+                if (button_is_clicked(&btn_invert, &event) && event.type == SDL_MOUSEBUTTONDOWN) {
+                    image_apply_invert(test_image);
+                    image_update_texture(renderer, test_image);
+                }
+                
             }
 
             switch (event.type) {
@@ -93,6 +103,7 @@ int main(int argc, char* argv[]) {
                     break;
                 case SDL_MOUSEMOTION:
                 case SDL_MOUSEBUTTONDOWN:
+                    // ... (resto de la lógica de dibujo)
                     if (drawing_mode && (event.motion.state & SDL_BUTTON_LMASK || event.button.button == SDL_BUTTON_LEFT)) {
                         int mx = (event.type == SDL_MOUSEMOTION) ? event.motion.x : event.button.x;
                         int my = (event.type == SDL_MOUSEMOTION) ? event.motion.y : event.button.y;
@@ -131,9 +142,13 @@ int main(int argc, char* argv[]) {
         button_render(renderer, &btn_save);
         button_render(renderer, &btn_draw);
         button_render(renderer, &btn_scale);
-        button_render(renderer, &btn_gray);
-        button_render(renderer, &btn_sepia);
-        button_render(renderer, &btn_invert);
+        button_render(renderer, &btn_edit);
+
+        if (show_toolbox) {
+            button_render(renderer, &btn_gray);
+            button_render(renderer, &btn_sepia);
+            button_render(renderer, &btn_invert);
+        }
 
         render_present(renderer);
         SDL_Delay(FRAME_DELAY);

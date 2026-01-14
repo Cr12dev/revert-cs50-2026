@@ -15,6 +15,7 @@ typedef struct {
     const char* label;
     SDL_Color color;
     bool hovered;
+    int padding;
 } Button;
 
 void ui_init(const char* font_path);

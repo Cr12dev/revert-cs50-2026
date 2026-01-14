@@ -33,11 +33,27 @@ void button_render(SDL_Renderer* renderer, Button* button) {
             SDL_Texture* text_tex = SDL_CreateTextureFromSurface(renderer, text_surf);
             int tw, th;
             SDL_QueryTexture(text_tex, NULL, NULL, &tw, &th);
-            SDL_Rect text_rect = {
-                button->rect.x + (button->rect.w - tw) / 2,
-                button->rect.y + (button->rect.h - th) / 2,
-                tw, th
-            };
+            
+            // Si padding es 0, pegamos al borde. Si es > 0, lo usamos de offset.
+            // Si queremos mantener centrado por defecto, podríamos usar un valor especial like -1.
+            // Pero seguiremos la instrucción del usuario para el toolbox.
+            SDL_Rect text_rect;
+            if (button->padding < 0) {
+                // Centrado automático
+                text_rect.x = button->rect.x + (button->rect.w - tw) / 2;
+                text_rect.y = button->rect.y + (button->rect.h - th) / 2;
+            } else if (button->padding == 0) {
+                // 0% padding: pegado al borde (top-left)
+                text_rect.x = button->rect.x;
+                text_rect.y = button->rect.y;
+            } else {
+                // Offset fijo por padding
+                text_rect.x = button->rect.x + button->padding;
+                text_rect.y = button->rect.y + button->padding;
+            }
+            text_rect.w = tw;
+            text_rect.h = th;
+
             SDL_RenderCopy(renderer, text_tex, NULL, &text_rect);
             SDL_DestroyTexture(text_tex);
             SDL_FreeSurface(text_surf);
