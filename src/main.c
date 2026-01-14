@@ -6,7 +6,12 @@
 #define WINDOW_HEIGHT 600
 #define FRAME_DELAY 16 
 
-int main(int agrc, char* argv[]) {
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        printf("Uso: %s <ruta_a_imagen>\n", argv[0]);
+        return 1;
+    }
+
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
     Image* test_image = NULL;
@@ -15,7 +20,7 @@ int main(int agrc, char* argv[]) {
         return 1;
     }
 
-    test_image = image_load(renderer, "./assets/images/1.png");
+    test_image = image_load(renderer, argv[1]);
     if (!test_image) {
         printf("No se pudo cargar la imagen. Saliendo... \n");
         graphics_cleanup(window, renderer);
