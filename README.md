@@ -13,6 +13,7 @@
 - **Interactive Editing:**
   - **Drawing Mode:** Toggle drawing to add annotations or "red points" to your images.
   - **Scaling:** Dynamic scaling (1x, 1.5x, 2x) with auto-fit capabilities.
+  - **Advanced Filters:** Apply Grayscale, Sepia, and Invert filters in real-time.
 - **Image Export:** Save your modifications directly to `.png`.
 - **UI Components:** Built-in custom buttons and text rendering for a smooth user experience.
 - **Responsive Layout:** Images are automatically centered and scaled to fit the window while maintaining aspect ratio.
@@ -28,13 +29,22 @@ You will need the following libraries installed on your system:
 - **SDL2_ttf**
 - **CMake** (v3.10+)
 
-On Ubuntu/Debian:
+#### Ubuntu/Debian:
 
 ```bash
 sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev cmake
 ```
 
-### Installation
+#### Windows (x64):
+
+1. Install [Visual Studio](https://visualstudio.microsoft.com/) with C++ support.
+2. It is recommended to use [vcpkg](https://github.com/microsoft/vcpkg) for dependencies:
+   ```powershell
+   vcpkg install sdl2 sdl2-image sdl2-ttf
+   ```
+3. Run CMake specifying the vcpkg toolchain.
+
+### Installation & Build
 
 1. **Clone the repository:**
 
@@ -49,7 +59,7 @@ sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev cmake
    mkdir build
    cd build
    cmake ..
-   make
+   make  # Logic for Linux. On Windows use: cmake --build .
    ```
 
 3. **Run the application:**

@@ -1,5 +1,5 @@
-#include "./graphics.h"
-#include "./ui.h"
+#include "graphics.h"
+#include "ui.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include "config.h"
@@ -20,7 +20,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    #ifdef _WIN32
+    ui_init("C:\\Windows\\Fonts\\arial.ttf");
+#else
     ui_init("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
+#endif
 
     test_image = image_load(renderer, argv[1]);
     if (!test_image) {
@@ -30,9 +34,15 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Button btn_save = {{10, 10, 120, 40}, "Guardar", {100, 100, 255}, false};
-    Button btn_draw = {{140, 10, 120, 40}, "Dibujar: OFF", {255, 100, 100}, false};
-    Button btn_scale = {{270, 10, 120, 40}, "Escala: 1x", {100, 255, 100}, false};
+    // Botones principales
+    Button btn_save = {{10, 10, 100, 30}, "Guardar", {100, 100, 255}, false};
+    Button btn_draw = {{120, 10, 120, 30}, "Dibujar: OFF", {255, 100, 100}, false};
+    Button btn_scale = {{250, 10, 100, 30}, "Escala: 1x", {100, 255, 100}, false};
+
+    // Botones de filtros
+    Button btn_gray = {{360, 10, 100, 30}, "Gris", {150, 150, 150}, false};
+    Button btn_sepia = {{470, 10, 100, 30}, "Sepia", {160, 120, 90}, false};
+    Button btn_invert = {{580, 10, 100, 30}, "Invertir", {200, 200, 200}, false};
 
     bool drawing_mode = false;
     float current_scale = 1.0f;
@@ -60,6 +70,20 @@ int main(int argc, char* argv[]) {
                 btn_scale.label = scale_label;
             }
 
+            // Lógica de filtros
+            if (button_is_clicked(&btn_gray, &event) && event.type == SDL_MOUSEBUTTONDOWN) {
+                image_apply_grayscale(test_image);
+                image_update_texture(renderer, test_image);
+            }
+            if (button_is_clicked(&btn_sepia, &event) && event.type == SDL_MOUSEBUTTONDOWN) {
+                image_apply_sepia(test_image);
+                image_update_texture(renderer, test_image);
+            }
+            if (button_is_clicked(&btn_invert, &event) && event.type == SDL_MOUSEBUTTONDOWN) {
+                image_apply_invert(test_image);
+                image_update_texture(renderer, test_image);
+            }
+
             switch (event.type) {
                 case SDL_QUIT:
                     running = false;
@@ -73,7 +97,6 @@ int main(int argc, char* argv[]) {
                         int mx = (event.type == SDL_MOUSEMOTION) ? event.motion.x : event.button.x;
                         int my = (event.type == SDL_MOUSEMOTION) ? event.motion.y : event.button.y;
                         
-                        // Solo dibujar si no estamos sobre botones
                         if (my > 60) {
                             int ww, wh;
                             SDL_GetRendererOutputSize(renderer, &ww, &wh);
@@ -108,6 +131,9 @@ int main(int argc, char* argv[]) {
         button_render(renderer, &btn_save);
         button_render(renderer, &btn_draw);
         button_render(renderer, &btn_scale);
+        button_render(renderer, &btn_gray);
+        button_render(renderer, &btn_sepia);
+        button_render(renderer, &btn_invert);
 
         render_present(renderer);
         SDL_Delay(FRAME_DELAY);

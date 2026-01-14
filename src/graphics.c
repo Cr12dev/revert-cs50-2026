@@ -182,3 +182,55 @@ void render_clear(SDL_Renderer* renderer, Uint8 r, Uint8 g, Uint8 b) {
 void render_present(SDL_Renderer* renderer) {
     SDL_RenderPresent(renderer);
 }
+
+void image_apply_grayscale(Image* image) {
+    if (!image || !image->surface) return;
+    SDL_LockSurface(image->surface);
+    Uint32* pixels = (Uint32*)image->surface->pixels;
+    int pixel_count = image->width * image->height;
+
+    for (int i = 0; i < pixel_count; i++) {
+        Uint8 r, g, b, a;
+        SDL_GetRGBA(pixels[i], image->surface->format, &r, &g, &b, &a);
+        Uint8 gray = (Uint8)(0.299f * r + 0.587f * g + 0.114f * b);
+        pixels[i] = SDL_MapRGBA(image->surface->format, gray, gray, gray, a);
+    }
+    SDL_UnlockSurface(image->surface);
+}
+
+void image_apply_sepia(Image* image) {
+    if (!image || !image->surface) return;
+    SDL_LockSurface(image->surface);
+    Uint32* pixels = (Uint32*)image->surface->pixels;
+    int pixel_count = image->width * image->height;
+
+    for (int i = 0; i < pixel_count; i++) {
+        Uint8 r, g, b, a;
+        SDL_GetRGBA(pixels[i], image->surface->format, &r, &g, &b, &a);
+        
+        int tr = (int)(0.393f * r + 0.769f * g + 0.189f * b);
+        int tg = (int)(0.349f * r + 0.686f * g + 0.168f * b);
+        int tb = (int)(0.272f * r + 0.534f * g + 0.131f * b);
+
+        Uint8 out_r = (tr > 255) ? 255 : tr;
+        Uint8 out_g = (tg > 255) ? 255 : tg;
+        Uint8 out_b = (tb > 255) ? 255 : tb;
+
+        pixels[i] = SDL_MapRGBA(image->surface->format, out_r, out_g, out_b, a);
+    }
+    SDL_UnlockSurface(image->surface);
+}
+
+void image_apply_invert(Image* image) {
+    if (!image || !image->surface) return;
+    SDL_LockSurface(image->surface);
+    Uint32* pixels = (Uint32*)image->surface->pixels;
+    int pixel_count = image->width * image->height;
+
+    for (int i = 0; i < pixel_count; i++) {
+        Uint8 r, g, b, a;
+        SDL_GetRGBA(pixels[i], image->surface->format, &r, &g, &b, &a);
+        pixels[i] = SDL_MapRGBA(image->surface->format, 255 - r, 255 - g, 255 - b, a);
+    }
+    SDL_UnlockSurface(image->surface);
+}
