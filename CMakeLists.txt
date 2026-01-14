@@ -37,7 +37,7 @@ set(SOURCES
 
 add_executable(sdl_image_renderer ${SOURCES})
 
-target_include_directories(sdl_image_renderer PRIVATE src ${SDL2_INCLUDE_DIRS})
+target_include_directories(sdl_image_renderer PRIVATE src include ${SDL2_INCLUDE_DIRS})
 target_link_libraries(sdl_image_renderer ${SDL2_LIBRARIES})
 
 if(WIN32 AND MSVC)

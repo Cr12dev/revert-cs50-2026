@@ -1,9 +1,17 @@
 #include "graphics.h"
+#include "memory.h"
 #include <stdio.h>
 
 
 
 bool graphics_init(SDL_Window** window, SDL_Renderer** renderer, int width, int height){
+    if (SDL_SetMemoryFunctions(my_malloc, my_calloc, my_realloc, my_free) != 0){
+        printf("Failed to set memory functions: %s\n", SDL_GetError());
+        return false;
+    } else {
+        printf("Memory functions set successfully: %s\n", my_malloc);
+    }
+    
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("Error al iniciar el SDL: %s\n", SDL_GetError());
         return false;
