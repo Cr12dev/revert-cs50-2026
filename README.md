@@ -9,14 +9,18 @@
 
 ## ✨ Features
 
-- **Multi-format Support:** Load `.bmp`, `.png`, and `.jpg` files.
+- **Advanced Processors:**
+  - **Normal Maps:** Generate surface normal maps in real-time from any image using Sobel-based edge detection.
+  - **Plugin System:** Robust, cross-platform architecture (`.so`/`.dll`) to add new filters without recompiling the main app.
+- **Enhanced UI Components:**
+  - **Checkboxes:** Interactive "toggle" components for feature activation (e.g., Normal Map mode).
+  - **Backup & Reset:** Instant restoration to the original image state when disabling filters.
 - **Interactive Editing:**
   - **Drawing Mode:** Toggle drawing to add annotations or "red points" to your images.
   - **Scaling:** Dynamic scaling (1x, 1.5x, 2x) with auto-fit capabilities.
-  - **Advanced Filters:** Apply Grayscale, Sepia, and Invert filters in real-time.
-- **Image Export:** Save your modifications directly to `.png`.
-- **UI Components:** Built-in custom buttons and text rendering for a smooth user experience.
-- **Responsive Layout:** Images are automatically centered and scaled to fit the window while maintaining aspect ratio.
+  - **Built-in Filters:** Apply Grayscale, Sepia, and Invert filters in real-time.
+- **Developer Tools:**
+  - **Plugin API:** Simple C-based API for creating external processing modules.
 
 ## 🚀 Getting Started
 
@@ -27,6 +31,7 @@ You will need the following libraries installed on your system:
 - **SDL2**
 - **SDL2_image**
 - **SDL2_ttf**
+- **libm** (usually included with gcc)
 - **CMake** (v3.10+)
 
 #### Ubuntu/Debian:
@@ -59,13 +64,21 @@ sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev cmake
    mkdir build
    cd build
    cmake ..
-   make  # Logic for Linux. On Windows use: cmake --build .
+   make  # This builds the main app and the included plugins.
    ```
 
 3. **Run the application:**
    ```bash
    ./sdl_image_renderer path/to/your/image.bmp
    ```
+
+## 🔌 Plugin System
+
+REVERT supports dynamic plugins. To use a plugin:
+
+1. Compile your plugin as a shared library (`.so` or `.dll`).
+2. Place it in the same directory as the executable.
+3. Open the **Plugins** panel in-app to see and apply your new filters.
 
 ## 🛠️ Utils `/utils`
 
@@ -94,13 +107,16 @@ python3 tests/test_graphics.py
 - [x] Support for `.png` and `.jpg` (via SDL_image)
 - [x] Basic drawing tools
 - [x] Image scaling system
+- [x] Advanced filters (Grayscale, Sepia, Invert)
+- [x] Sobel-based Normal Mapping
+- [x] Dynamic Plugin Architecture
+- [x] Backup & Reset system
 - [ ] Multiple brush colors and sizes
 - [ ] Undo/Redo functionality
-- [ ] Advanced filters (Grayscale, Sepia, etc.)
 
 ## 📜 License
 
-This project is developed for educational purposes as part of Harvard's CS50. See the [LICENSE](LICENSE) file for details (if applicable).
+This project is licensed under the **GNU General Public License v3.0**. See the [LICENSE](LICENSE) file for details.
 
 ---
 
