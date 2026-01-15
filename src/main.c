@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "config.h"
+#include "plugin_manager.h"
+
 
 #define FRAME_DELAY 16 
 
@@ -50,11 +52,26 @@ int main(int argc, char* argv[]) {
     Button btn_sepia  = ui_create_button(330, 70, 100, 30, "Sepia", win_vista_black, 0);
     Button btn_invert = ui_create_button(330, 100, 100, 30, "Inv", win_vista_black, 0);
 
+    Button btn_plugins = ui_create_button(530, 10, 100, 30, "Plugins", win_vista_black, 0);
+
+    PluginManager pm;
+    plugin_manager_init(&pm);
+    plugin_manager_load_dir(&pm, "."); // Carga plugins desde el directorio actual (donde esten los .so/.dll)
+
+    // Crear botones para plugins dinamicamente
+    Button plugin_buttons[MAX_PLUGINS];
+    for (int i = 0; i < pm.count; i++) {
+        plugin_buttons[i] = ui_create_button(530, 40 + (i * 30), 150, 30, pm.plugins[i].plugin->info.name, win_vista_black, 5);
+    }
+
+
     bool drawing_mode = false;
     bool show_toolbox = false;
     bool show_adv = false;
+    bool show_plugins = false;
     float current_scale = 1.0f;
     bool running = true;
+
     SDL_Event event;
 
     // Elementos del panel Advanced
@@ -110,6 +127,12 @@ int main(int argc, char* argv[]) {
                 show_adv = !show_adv;
                 btn_adv.label = show_adv ? "Close" : "Advanced";
             }
+
+            if (button_is_clicked(&btn_plugins, &event) && event.type == SDL_MOUSEBUTTONDOWN) {
+                show_plugins = !show_plugins;
+                btn_plugins.label = show_plugins ? "Close" : "Plugins";
+            }
+
 
             // Lógica de filtros (solo si toolbox está abierto)
             if (show_toolbox) {
@@ -172,6 +195,16 @@ int main(int argc, char* argv[]) {
                 }
             }
 
+            if (show_plugins) {
+                for (int i = 0; i < pm.count; i++) {
+                    if (button_is_clicked(&plugin_buttons[i], &event) && event.type == SDL_MOUSEBUTTONDOWN) {
+                        pm.plugins[i].plugin->apply(test_image);
+                        image_update_texture(renderer, test_image);
+                    }
+                }
+            }
+
+
 
 
             switch (event.type) {
@@ -228,6 +261,8 @@ int main(int argc, char* argv[]) {
         button_render(renderer, &btn_scale);
         button_render(renderer, &btn_edit);
         button_render(renderer, &btn_adv);
+        button_render(renderer, &btn_plugins);
+
 
         if (show_toolbox) {
             button_render(renderer, &btn_gray);
@@ -267,13 +302,22 @@ int main(int argc, char* argv[]) {
             checkbox_render(renderer, &normalmap_checkbox);
         }
 
+        if (show_plugins) {
+            for (int i = 0; i < pm.count; i++) {
+                button_render(renderer, &plugin_buttons[i]);
+            }
+        }
+
+
 
         render_present(renderer);
         SDL_Delay(FRAME_DELAY);
     }
 
     image_free(test_image);
+    plugin_manager_cleanup(&pm);
     ui_cleanup();
+
     graphics_cleanup(window, renderer);
     return 0;
 }

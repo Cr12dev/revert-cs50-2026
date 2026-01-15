@@ -33,12 +33,20 @@ set(SOURCES
     src/main.c
     src/graphics.c
     src/ui.c
+    src/plugin_manager.c
 )
 
 add_executable(sdl_image_renderer ${SOURCES})
 
 target_include_directories(sdl_image_renderer PRIVATE src include ${SDL2_INCLUDE_DIRS})
-target_link_libraries(sdl_image_renderer ${SDL2_LIBRARIES} m)
+target_link_libraries(sdl_image_renderer ${SDL2_LIBRARIES} m ${CMAKE_DL_LIBS})
+
+# Plugins
+add_library(negative_plugin SHARED plugins/negative_plugin.c)
+target_include_directories(negative_plugin PRIVATE src include ${SDL2_INCLUDE_DIRS})
+target_link_libraries(negative_plugin ${SDL2_LIBRARIES})
+set_target_properties(negative_plugin PROPERTIES PREFIX "" SUFFIX ".so")
+
 
 if(WIN32 AND MSVC)
     set_target_properties(sdl_image_renderer PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
