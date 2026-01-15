@@ -22,6 +22,47 @@ void plugin_manager_init(PluginManager* manager) {
     manager->count = 0;
 }
 
+void plugin_manager_compile_sources(const char* src_dir, const char* bin_dir) {
+    DIR* dir = opendir(src_dir);
+    if (!dir) {
+        perror("Error opening plugins_src");
+        return;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (strstr(entry->d_name, ".c")) {
+            char src_path[512];
+            char bin_path[512];
+            snprintf(src_path, sizeof(src_path), "%s/%s", src_dir, entry->d_name);
+            
+            // Output name change: plugin.c -> plugin.so
+            char base_name[256];
+            size_t len = strlen(entry->d_name);
+            strncpy(base_name, entry->d_name, len - 2);
+            base_name[len - 2] = '\0';
+            
+            snprintf(bin_path, sizeof(bin_path), "%s/%s" LIB_EXT, bin_dir, base_name);
+
+            printf("Auto-compiling plugin: %s -> %s\n", src_path, bin_path);
+
+            char cmd[2048];
+#ifdef _WIN32
+            // Simplistic Windows command (assumes gcc/mingw in path)
+            snprintf(cmd, sizeof(cmd), "gcc -shared -o %s %s -I../include -I../src -lSDL2 -lSDL2_image -lSDL2_ttf", bin_path, src_path);
+#else
+            // Linux command using pkg-config
+            snprintf(cmd, sizeof(cmd), "gcc -shared -fPIC %s -o %s -I../include -I../src $(pkg-config --cflags --libs sdl2 SDL2_image SDL2_ttf) -lm > /dev/null 2>&1", src_path, bin_path);
+#endif
+            int ret = system(cmd);
+            if (ret != 0) {
+                fprintf(stderr, "Error compiling plugin: %s\n", entry->d_name);
+            }
+        }
+    }
+    closedir(dir);
+}
+
 static void load_plugin(PluginManager* manager, const char* path) {
     if (manager->count >= MAX_PLUGINS) return;
 

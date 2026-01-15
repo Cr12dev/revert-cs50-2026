@@ -56,7 +56,11 @@ int main(int argc, char* argv[]) {
 
     PluginManager pm;
     plugin_manager_init(&pm);
-    plugin_manager_load_dir(&pm, "."); // Carga plugins desde el directorio actual (donde esten los .so/.dll)
+    // Compilar automaticamente el codigo fuente que el usuario suelte en plugins_src
+    plugin_manager_compile_sources("plugins_src", "plugins_bin");
+    // Cargar los plugins resultantes de plugins_bin y los de la carpeta actual
+    plugin_manager_load_dir(&pm, "."); 
+    plugin_manager_load_dir(&pm, "plugins_bin");
 
     // Crear botones para plugins dinamicamente
     Button plugin_buttons[MAX_PLUGINS];

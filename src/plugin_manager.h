@@ -16,7 +16,9 @@ typedef struct {
 } PluginManager;
 
 void plugin_manager_init(PluginManager* manager);
+void plugin_manager_compile_sources(const char* src_dir, const char* bin_dir);
 void plugin_manager_load_dir(PluginManager* manager, const char* dir_path);
 void plugin_manager_cleanup(PluginManager* manager);
+
 
 #endif
