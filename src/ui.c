@@ -34,7 +34,8 @@ void button_render(SDL_Renderer* renderer, Button* button) {
     }
     SDL_RenderFillRect(renderer, &button->rect);
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    // Borde mas fino (color mas suave)
+    SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
     SDL_RenderDrawRect(renderer, &button->rect);
 
     if (global_font && button->label) {
@@ -108,7 +109,8 @@ void checkbox_render(SDL_Renderer* renderer, Checkbox* checkbox) {
     SDL_RenderFillRect(renderer, &checkbox->rect);
 
     // Border
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    // Border mas fino (color mas suave)
+    SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
     SDL_RenderDrawRect(renderer, &checkbox->rect);
 
     // If checked, draw an inner mark

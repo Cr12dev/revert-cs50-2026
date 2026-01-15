@@ -6,16 +6,16 @@ static void apply_negative(Image* image) {
     
     SDL_Surface* surf = image->surface;
     SDL_LockSurface(surf);
-    Uint8* pixels = (Uint8*)surf->pixels;
+    
+    int total_pixels = image->width * image->height;
+    Uint32* pixels = (Uint32*)surf->pixels;
 
-    for (int y = 0; y < image->height; y++) {
-        for (int x = 0; x < image->width; x++) {
-            Uint8* p_ptr = pixels + y * surf->pitch + x * 4;
-            p_ptr[0] = 255 - p_ptr[0]; // R
-            p_ptr[1] = 255 - p_ptr[1]; // G
-            p_ptr[2] = 255 - p_ptr[2]; // B
-        }
+    for (int i = 0; i < total_pixels; i++) {
+        Uint8 r, g, b, a;
+        SDL_GetRGBA(pixels[i], surf->format, &r, &g, &b, &a);
+        pixels[i] = SDL_MapRGBA(surf->format, 255 - r, 255 - g, 255 - b, a);
     }
+    
     SDL_UnlockSurface(surf);
 }
 
@@ -23,9 +23,11 @@ static ImagePlugin plugin = {
     .info = {
         .name = "Negative Filter",
         .author = "System",
-        .version = "1.0.0"
+        .version = "1.0.1",
+        .show_in_advanced = false
     },
-    .apply = apply_negative
+    .apply = apply_negative,
+    .apply_param = NULL
 };
 
 ImagePlugin* plugin_init() {

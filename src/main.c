@@ -4,11 +4,14 @@
 #include <stdbool.h>
 #include "config.h"
 #include "plugin_manager.h"
+#include <string.h>
 
 
 #define FRAME_DELAY 16 
 
 int main(int argc, char* argv[]) {
+    printf("Starting application...\n");
+
     if (argc < 2) {
         printf("Uso: %s <ruta_a_imagen>\n", argv[0]);
         return 1;
@@ -37,36 +40,67 @@ int main(int argc, char* argv[]) {
     }
 
     // Botones (Estilo clasico: Negro/Blanco, Sin Margenes, 0 Padding)
-    SDL_Color win_vista_black = {0, 0, 0, 255};
+    // Colores de la UI (Gris Oscuro)
+    SDL_Color ui_dark_gray = {40, 40, 40, 255};
     
-    Button btn_save   = ui_create_button(10, 10, 100, 30, "Guardar", win_vista_black, 0);
-    Button btn_draw   = ui_create_button(110, 10, 120, 30, "Dibujar: OFF", win_vista_black, 0);
-    Button btn_scale  = ui_create_button(230, 10, 100, 30, "Escala: 1x", win_vista_black, 0);
-    Button btn_edit   = ui_create_button(330, 10, 100, 30, "Edit", win_vista_black, 0);
+    Button btn_save   = ui_create_button(10, 10, 100, 30, "Guardar", ui_dark_gray, 0);
+    Button btn_draw   = ui_create_button(110, 10, 120, 30, "Dibujar: OFF", ui_dark_gray, 0);
+    Button btn_scale  = ui_create_button(230, 10, 100, 30, "Escala: 1x", ui_dark_gray, 0);
+    Button btn_edit   = ui_create_button(330, 10, 100, 30, "Edit", ui_dark_gray, 0);
 
     //Advanced button
-    Button btn_adv    = ui_create_button(430, 10, 100, 30, "Advanced", win_vista_black, 0);
+    Button btn_adv    = ui_create_button(430, 10, 100, 30, "Advanced", ui_dark_gray, 0);
 
     // Botones de filtros (Toolbox Vertical - Sin Margenes)
-    Button btn_gray   = ui_create_button(330, 40, 100, 30, "Gris", win_vista_black, 0);
-    Button btn_sepia  = ui_create_button(330, 70, 100, 30, "Sepia", win_vista_black, 0);
-    Button btn_invert = ui_create_button(330, 100, 100, 30, "Inv", win_vista_black, 0);
+    Button btn_gray   = ui_create_button(330, 40, 100, 30, "Gris", ui_dark_gray, 0);
+    Button btn_sepia  = ui_create_button(330, 70, 100, 30, "Sepia", ui_dark_gray, 0);
+    Button btn_invert = ui_create_button(330, 100, 100, 30, "Inv", ui_dark_gray, 0);
 
-    Button btn_plugins = ui_create_button(530, 10, 100, 30, "Plugins", win_vista_black, 0);
+    Button btn_plugins = ui_create_button(530, 10, 100, 30, "Plugins", ui_dark_gray, 0);
 
     PluginManager pm;
     plugin_manager_init(&pm);
-    // Compilar automaticamente el codigo fuente que el usuario suelte en plugins_src
+    printf("Compiling plugin sources...\n");
     plugin_manager_compile_sources("plugins_src", "plugins_bin");
-    // Cargar los plugins resultantes de plugins_bin y los de la carpeta actual
+    
+    printf("Loading plugins...\n");
     plugin_manager_load_dir(&pm, "."); 
     plugin_manager_load_dir(&pm, "plugins_bin");
+    printf("Plugins loaded: %d\n", pm.count);
 
     // Crear botones para plugins dinamicamente
+    printf("Initializing plugin UI arrays...\n");
     Button plugin_buttons[MAX_PLUGINS];
+    Button adv_plugin_labels[MAX_PLUGINS];
+    Button adv_plugin_minus[MAX_PLUGINS];
+    Button adv_plugin_plus[MAX_PLUGINS];
+    memset(plugin_buttons, 0, sizeof(plugin_buttons));
+    memset(adv_plugin_labels, 0, sizeof(adv_plugin_labels));
+    memset(adv_plugin_minus, 0, sizeof(adv_plugin_minus));
+    memset(adv_plugin_plus, 0, sizeof(adv_plugin_plus));
+    int adv_plugin_count = 0;
+
+
+    printf("Creating plugin buttons...\n");
     for (int i = 0; i < pm.count; i++) {
-        plugin_buttons[i] = ui_create_button(530, 40 + (i * 30), 150, 30, pm.plugins[i].plugin->info.name, win_vista_black, 5);
+        if (pm.plugins[i].plugin) {
+            printf("Creating button for plugin: %s\n", pm.plugins[i].plugin->info.name);
+            plugin_buttons[i] = ui_create_button(530, 40 + (i * 30), 150, 30, pm.plugins[i].plugin->info.name, ui_dark_gray, 5);
+            
+            if (pm.plugins[i].plugin->info.show_in_advanced) {
+                printf(" - Adding to advanced panel\n");
+                int y = 310 + (adv_plugin_count * 40);
+                adv_plugin_labels[i] = ui_create_button(20, y, 150, 30, pm.plugins[i].plugin->info.name, ui_dark_gray, 0);
+                adv_plugin_minus[i] = ui_create_button(170, y, 40, 30, "-", ui_dark_gray, -1);
+                adv_plugin_plus[i] = ui_create_button(210, y, 40, 30, "+", ui_dark_gray, -1);
+                adv_plugin_count++;
+            }
+        }
     }
+    printf("Plugin UI setup complete.\n");
+
+
+
 
 
     bool drawing_mode = false;
@@ -79,26 +113,27 @@ int main(int argc, char* argv[]) {
     SDL_Event event;
 
     // Elementos del panel Advanced
-    Button lbl_title = ui_create_button(10, 50, 480, 40, "--- ADVANCED SETTINGS ---", win_vista_black, -1);
+    Button lbl_title = ui_create_button(10, 50, 480, 40, "--- ADVANCED SETTINGS ---", ui_dark_gray, -1);
     
-    Button opt_brightness = ui_create_button(20, 110, 150, 30, "Brightness", win_vista_black, 0);
-    Button less_brightness = ui_create_button(170, 110, 40, 30, "-", win_vista_black, -1);
-    Button more_brightness = ui_create_button(210, 110, 40, 30, "+", win_vista_black, -1);
+    Button opt_brightness = ui_create_button(20, 110, 150, 30, "Brightness", ui_dark_gray, 0);
+    Button less_brightness = ui_create_button(170, 110, 40, 30, "-", ui_dark_gray, -1);
+    Button more_brightness = ui_create_button(210, 110, 40, 30, "+", ui_dark_gray, -1);
 
-    Button opt_contrast = ui_create_button(20, 150, 150, 30, "Contrast", win_vista_black, 0);
-    Button less_contrast = ui_create_button(170, 150, 40, 30, "-", win_vista_black, -1);
-    Button more_contrast = ui_create_button(210, 150, 40, 30, "+", win_vista_black, -1);
+    Button opt_contrast = ui_create_button(20, 150, 150, 30, "Contrast", ui_dark_gray, 0);
+    Button less_contrast = ui_create_button(170, 150, 40, 30, "-", ui_dark_gray, -1);
+    Button more_contrast = ui_create_button(210, 150, 40, 30, "+", ui_dark_gray, -1);
 
-    Button opt_saturation = ui_create_button(20, 190, 150, 30, "Saturation", win_vista_black, 0);
-    Button less_saturation = ui_create_button(170, 190, 40, 30, "-", win_vista_black, -1);
-    Button more_saturation = ui_create_button(210, 190, 40, 30, "+", win_vista_black, -1);
+    Button opt_saturation = ui_create_button(20, 190, 150, 30, "Saturation", ui_dark_gray, 0);
+    Button less_saturation = ui_create_button(170, 190, 40, 30, "-", ui_dark_gray, -1);
+    Button more_saturation = ui_create_button(210, 190, 40, 30, "+", ui_dark_gray, -1);
 
-    Button opt_blur = ui_create_button(20, 230, 150, 30, "Blur", win_vista_black, 0);
-    Button less_blur = ui_create_button(170, 230, 40, 30, "-", win_vista_black, -1);
-    Button more_blur = ui_create_button(210, 230, 40, 30, "+", win_vista_black, -1);
+    Button opt_blur = ui_create_button(20, 230, 150, 30, "Blur", ui_dark_gray, 0);
+    Button less_blur = ui_create_button(170, 230, 40, 30, "-", ui_dark_gray, -1);
+    Button more_blur = ui_create_button(210, 230, 40, 30, "+", ui_dark_gray, -1);
 
-    Button opt_normal = ui_create_button(20, 270, 150, 30, "NormalMap", win_vista_black, 0);
-    Checkbox normalmap_checkbox = ui_create_checkbox(170, 270, 30, "", win_vista_black, false);
+    Button opt_normal = ui_create_button(20, 270, 150, 30, "NormalMap", ui_dark_gray, 0);
+    Checkbox normalmap_checkbox = ui_create_checkbox(170, 270, 30, "", ui_dark_gray, false);
+
 
 
     while (running){
@@ -188,7 +223,6 @@ int main(int argc, char* argv[]) {
                     image_apply_gaussian_blur(test_image, 1); // Blur suave
                     image_update_texture(renderer, test_image);
                 }
-
                 if (checkbox_handle_event(&normalmap_checkbox, &event)) {
                     if (normalmap_checkbox.checked) {
                         image_apply_normalmap(test_image);
@@ -197,16 +231,39 @@ int main(int argc, char* argv[]) {
                     }
                     image_update_texture(renderer, test_image);
                 }
+
+
+                // Plugins en panel avanzado
+                for (int i = 0; i < pm.count; i++) {
+                    if (pm.plugins[i].plugin->info.show_in_advanced) {
+                        if (button_is_clicked(&adv_plugin_plus[i], &event) && event.type == SDL_MOUSEBUTTONDOWN) {
+                            if (pm.plugins[i].plugin->apply_param) {
+                                pm.plugins[i].plugin->apply_param(test_image, 50.0f); // Ejemplo: incremento de intensidad
+                                image_update_texture(renderer, test_image);
+                            }
+                        }
+                        if (button_is_clicked(&adv_plugin_minus[i], &event) && event.type == SDL_MOUSEBUTTONDOWN) {
+                            if (pm.plugins[i].plugin->apply_param) {
+                                pm.plugins[i].plugin->apply_param(test_image, 10.0f); // Ejemplo: intensidad baja
+                                image_update_texture(renderer, test_image);
+                            }
+                        }
+                    }
+                }
             }
+
 
             if (show_plugins) {
                 for (int i = 0; i < pm.count; i++) {
                     if (button_is_clicked(&plugin_buttons[i], &event) && event.type == SDL_MOUSEBUTTONDOWN) {
-                        pm.plugins[i].plugin->apply(test_image);
-                        image_update_texture(renderer, test_image);
+                        if (pm.plugins[i].plugin && pm.plugins[i].plugin->apply) {
+                            pm.plugins[i].plugin->apply(test_image);
+                            image_update_texture(renderer, test_image);
+                        }
                     }
                 }
             }
+
 
 
 
@@ -275,13 +332,13 @@ int main(int argc, char* argv[]) {
         }
 
         if (show_adv) {
-            // Panel Advanced (Estilo Vista)
+            // Panel Advanced (Gris Oscuro)
             SDL_Rect adv_panel = {10, 40, 500, 600};
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
             SDL_RenderFillRect(renderer, &adv_panel);
             
-            // Borde blanco
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            // Borde gris mas suave
+            SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
             SDL_RenderDrawRect(renderer, &adv_panel);
 
             // Renderizado de contenido del panel
@@ -304,7 +361,17 @@ int main(int argc, char* argv[]) {
 
             button_render(renderer, &opt_normal);
             checkbox_render(renderer, &normalmap_checkbox);
+
+            // Renderizado de plugins avanzados
+            for (int i = 0; i < pm.count; i++) {
+                if (pm.plugins[i].plugin->info.show_in_advanced) {
+                    button_render(renderer, &adv_plugin_labels[i]);
+                    button_render(renderer, &adv_plugin_minus[i]);
+                    button_render(renderer, &adv_plugin_plus[i]);
+                }
+            }
         }
+
 
         if (show_plugins) {
             for (int i = 0; i < pm.count; i++) {

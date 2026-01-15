@@ -47,6 +47,12 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/assets/images)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/plugins_src)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/plugins_bin)
 
+# Copy all plugins as templates/samples
+file(GLOB PLUGIN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/plugins/*.c")
+if(PLUGIN_FILES)
+    file(COPY ${PLUGIN_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/plugins_src)
+endif()
+
 if(WIN32 AND MSVC)
     set_target_properties(sdl_image_renderer PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
 endif()
@@ -55,5 +61,3 @@ if(APPLE)
     find_library(COCOA_LIBRARY Cocoa)
     target_link_libraries(sdl_image_renderer ${COCOA_LIBRARY})
 endif()
-
-
