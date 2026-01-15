@@ -38,7 +38,7 @@ set(SOURCES
 add_executable(sdl_image_renderer ${SOURCES})
 
 target_include_directories(sdl_image_renderer PRIVATE src include ${SDL2_INCLUDE_DIRS})
-target_link_libraries(sdl_image_renderer ${SDL2_LIBRARIES})
+target_link_libraries(sdl_image_renderer ${SDL2_LIBRARIES} m)
 
 if(WIN32 AND MSVC)
     set_target_properties(sdl_image_renderer PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")

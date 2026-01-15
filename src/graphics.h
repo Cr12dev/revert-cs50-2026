@@ -17,6 +17,7 @@
 typedef struct {
     SDL_Texture* texture;
     SDL_Surface* surface;
+    SDL_Surface* backup_surface;
     int width;
     int height;
 } Image;
@@ -32,11 +33,18 @@ void image_render_centered(SDL_Renderer* renderer, Image* image, float custom_sc
 bool image_save(Image* image, const char* filename);
 void image_draw_point(Image* image, SDL_Renderer* renderer, int x, int y, Uint32 color);
 void image_update_texture(SDL_Renderer* renderer, Image* image);
+void image_reset(Image* image);
 
 // Advanced Filters
 void image_apply_grayscale(Image* image);
 void image_apply_sepia(Image* image);
 void image_apply_invert(Image* image);
+void image_apply_brightness(Image* image, int factor);
+void image_apply_contrast(Image* image, float factor);
+void image_apply_saturation(Image* image, float factor);
+void image_apply_gaussian_blur(Image* image, int radius);
+void image_apply_normalmap(Image* image);
+
 
 
 void render_clear(SDL_Renderer* renderer, Uint8 r, Uint8 g, Uint8 b);
